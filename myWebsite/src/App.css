@@ -1,0 +1,175 @@
+@import url(animations.css);
+@import url(index.css);
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --sky-light: #b2d4fa;
+  --sky-med: #8eb4df;
+  --sky-dark: #6195d1;
+  --charcoal:  #666666;
+  --light-charcoal: #e5e5e5;
+  --med-charcoal: #999999;
+
+
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+.app {
+  width: 100%;
+  min-height: 100vh;
+  
+  background-color: white;
+  
+  background-size: cover; 
+  background-position: center;
+  background-repeat: repeat;
+  /*background-image: url('./assets/homeBG.png');*/
+
+}
+
+/* Navigation Bar */
+.navbar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 4rem;
+  background-color: white;
+  border-bottom: 1px solid var(--light-grey);
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 3rem;
+  margin-left: auto;
+}
+
+.nav-links li a {
+  text-decoration: none;
+  color: var(--charcoal);
+  font-size: 1rem;
+  font-weight: 400;
+  transition: color 0.3s ease;
+}
+
+.nav-links li a:hover {
+  color: var(--sky-med);
+}
+
+/* Main Content */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4rem 2rem;
+  gap: 4rem;
+  min-height: calc(100vh - 100px);
+}
+
+.left-section {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.floating-image {
+  animation: float 3s ease-in-out infinite;
+  user-select: none;  
+}
+
+.floating-image img {
+  width: 100%;
+  max-width: 350px;
+  height: auto;
+}
+
+.right-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: rem;
+}
+
+.greeting {
+  font-size: 3rem;
+  font-weight: 600;
+  color: var(--charcoal);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
+  margin-bottom: 0.5rem;
+}
+
+.profession {
+  font-size: 1.25rem;
+  color: var(--sky-dark);
+  font-weight: 400;
+  margin-bottom: 0.5rem;
+}
+
+.description {
+  font-size: 1.125rem;
+  color: var(--med-charcoal);
+  font-style: italic;
+  margin-bottom: 2rem;
+}
+
+.button-group {
+  display: flex;
+  gap: 1.5rem;
+}
+
+
+/* Responsive design? */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 1rem 2rem;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .nav-links {
+    gap: 1.5rem;
+  }
+  
+  .container {
+    flex-direction: column;
+    gap: 2rem;
+    padding: 2rem;
+  }
+  
+  .greeting {
+    font-size: 2rem;
+    text-align: center;
+  }
+  
+  .profession,
+  .description {
+    text-align: center;
+  }
+  
+  .button-group {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+  
+  .floating-image img {
+    max-width: 250px;
+  }
+}
+
