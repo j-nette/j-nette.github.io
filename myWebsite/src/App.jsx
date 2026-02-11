@@ -38,8 +38,8 @@ function App() {
                 <Typing/>
                 <p className="description">I like making things go beep boop.</p>
                 <div className="button-group">
-                  <button>View My Work</button>
-                  <button>Let's Connect</button>
+                  <button><Link to="/portfolio">View My Work</Link></button>
+                  <button><Link to="/contact">Let's Connect</Link></button>
                 </div>
               </div>
             </div>

@@ -1,7 +1,8 @@
-import React, { useMemo, useState, useRef, useEffect } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import ForceGraph2D from "react-force-graph-2d";
 import projects from "../assets/projects";
 import "../App.css";
+import ProjectCard from "./Project";
 
 import peekImage from '../assets/peek.png';
 
@@ -10,6 +11,7 @@ function Portfolio() {
   const [hoveredNode, setHoveredNode] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState(null);
 
   const searchRef = useRef(null);
   const normalizedQuery = searchQuery.toLowerCase().trim();
@@ -103,6 +105,14 @@ function Portfolio() {
     return titleMatch || tagMatch || techMatch;
   };
 
+  const handleNodeClick = (node) => {
+    setSelectedProjectId(node.id);
+  };
+
+  const handleCloseCard = () => {
+    setSelectedProjectId(null);
+  };
+
 
   return (
     <>
@@ -130,7 +140,7 @@ function Portfolio() {
         >
           <input
             type="text"
-            placeholder="Search projects, skills, etc...."
+            placeholder="Search projects, skills, etc..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setIsFocused(true)}
@@ -167,6 +177,7 @@ function Portfolio() {
           linkWidth={3}
           onEngineStop={() => fgRef.current?.zoomToFit(400)}
           onNodeHover={setHoveredNode}
+          onNodeClick={handleNodeClick}
           linkColor={(link) => {
             if (!normalizedQuery) return "#b2d4fa9d";
 
@@ -209,6 +220,14 @@ function Portfolio() {
           }}
         />
       </div>
+
+      {/* Project Card */}
+      {selectedProjectId && (
+        <ProjectCard 
+          projectId={selectedProjectId} 
+          onClose={handleCloseCard}
+        />
+      )}
     </>
   );
 }
