@@ -50,5 +50,8 @@ button:focus-visible {
   outline: none;
 }
 
+.img{
+  user-select: none;   
+}
 
 

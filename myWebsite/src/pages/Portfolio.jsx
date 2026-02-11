@@ -3,6 +3,9 @@ import ForceGraph2D from "react-force-graph-2d";
 import projects from "../assets/projects";
 import "../App.css";
 
+import peekImage from '../assets/peek.png';
+
+
 function Portfolio() {
   const [hoveredNode, setHoveredNode] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -105,11 +108,20 @@ function Portfolio() {
     <>
       <div className="portfolio-header">
         <div className="portfolio-header-text">
-          <h1 className="portfolio-title">My Work</h1>
+          <h1 className="portfolio-title">My Little Creations</h1>
           <p className="description">
-            Click on a dot to view a project.
+            Tap a dot to view a project.
           </p>
         </div>
+        <div className= "peek-section">
+            <div className="peek-image">
+                <img 
+                src={peekImage} 
+                alt="Peek-a-boo!" 
+                />
+            </div>
+        </div>
+
 
         {/*Search*/}
         <div
@@ -184,7 +196,7 @@ function Portfolio() {
               false
             );
 
-            ctx.fillStyle = isHovered ? '#b2d4fa' : (matches ? '#999999' : '#999999');
+            ctx.fillStyle = isHovered ? '#b2d4fa' : (matches ? '#b2d4fa' : '#999999');
             ctx.fill();
 
             ctx.font = `${fontSize}px Segoe UI`;
