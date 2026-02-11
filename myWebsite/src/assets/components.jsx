@@ -10,8 +10,8 @@ function Typing() {
       typeSpeed: 30,
       backSpeed: 20,
       loop: true,      
-     showCursor: true,   
-    cursorChar: '|'
+      showCursor: true,   
+      cursorChar: '|'
     });
 
     return () => {

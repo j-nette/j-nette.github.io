@@ -1,10 +1,15 @@
+@import url(App.css);
+
 a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+  text-decoration: none;
+  color: var(--charcoal);
+  font-size: 1rem;
+  font-weight: 400;
+  transition: color 0.3s ease;
+  user-select: none;  
 }
 a:hover {
-  color: #535bf2;
+  color: var(--sky-med);
 }
 
 body {
@@ -22,15 +27,13 @@ button {
   padding: 0.875rem 2rem;
   font-size: 1rem;
   font-weight: 400;
-  border: 2px solid var(--sky-light);
-  background-color: var(white);
+  border: 2px solid var(--med-charcoal);
+  background-color: white;
   color: var(--sky-dark);
   cursor: pointer;
   border-radius: 4px;
   transition: all 0.3s ease;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: 'Segoe UI', sans-serif;
 
   /* Disable text select? */
   user-select: none;   
@@ -44,7 +47,7 @@ button:hover {
 
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: none;
 }
 
 
