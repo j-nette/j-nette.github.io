@@ -41,6 +41,8 @@ function Portfolio() {
     };
   }, []);
 
+   
+
   //search
   const allSearchTerms = useMemo(() => {
     const terms = new Set();
@@ -77,11 +79,20 @@ function Portfolio() {
     }));
 
     const links = [];
-    for (let i = 0; i < nodes.length - 1; i++) {
-      links.push({
-        source: nodes[i].id,
-        target: nodes[i + 1].id
-      });
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const node1Tags = nodes[i].tags || [];
+        const node2Tags = nodes[j].tags || [];
+        
+        const hasSharedTag = node1Tags.some(tag => node2Tags.includes(tag));
+        
+        if (hasSharedTag) {
+          links.push({
+            source: nodes[i].id,
+            target: nodes[j].id
+          });
+        }
+      }
     }
 
     return { nodes, links };
@@ -175,9 +186,18 @@ function Portfolio() {
           backgroundColor="#ffffff"
           nodeRelSize={3}
           linkWidth={3}
-          onEngineStop={() => fgRef.current?.zoomToFit(400)}
+          
           onNodeHover={setHoveredNode}
           onNodeClick={handleNodeClick}
+          d3AlphaDecay={0.05}
+          d3VelocityDecay={0.5}
+          d3Force={{
+            charge: { strength: -10 },
+            center: { strength: 0.5 },
+            collide: { radius: 20 }
+          }}
+          
+
           linkColor={(link) => {
             if (!normalizedQuery) return "#b2d4fa9d";
 

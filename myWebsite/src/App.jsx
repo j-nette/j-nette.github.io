@@ -13,9 +13,9 @@ function App() {
       <nav className="navbar">
         <ul className="nav-links">
           <li><Link to="/">Home</Link></li>
-          <li><Link to="/about">About</Link></li>
+          {/*<li><Link to="/about">About</Link></li>*/}
           <li><Link to="/portfolio">Portfolio</Link></li>
-          <li><Link to="/contact">Contact</Link></li>
+          {/*<li><Link to="/contact">Contact</Link></li>*/}
         </ul>
       </nav>
 
@@ -39,7 +39,7 @@ function App() {
                 <p className="description">I like making things go beep boop.</p>
                 <div className="button-group">
                   <button><Link to="/portfolio">View My Work</Link></button>
-                  <button><Link to="/contact">Let's Connect</Link></button>
+                  {/*<button><Link to="/contact">Let's Connect</Link></button>*/}
                 </div>
               </div>
             </div>
