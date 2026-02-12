@@ -12,11 +12,23 @@ function Portfolio() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState(null);
+  const [hoverPosition, setHoverPosition] = useState({ x: 0, y: 0 });
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   const searchRef = useRef(null);
   const normalizedQuery = searchQuery.toLowerCase().trim();
 
   const fgRef = useRef();
+
+  // Detect mobile/desktop on resize
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // close search with esc
   useEffect(() => {
@@ -116,6 +128,26 @@ function Portfolio() {
     return titleMatch || tagMatch || techMatch;
   };
 
+  const filteredProjects = useMemo(() => {
+    return projects.filter(project => {
+      if (!normalizedQuery) return true;
+
+      const titleMatch = project.title
+        .toLowerCase()
+        .includes(normalizedQuery);
+
+      const tagMatch = project.tags?.some((tag) =>
+        tag.toLowerCase().includes(normalizedQuery)
+      );
+
+      const techMatch = project.technologies?.some((tech) =>
+        tech.toLowerCase().includes(normalizedQuery)
+      );
+
+      return titleMatch || tagMatch || techMatch;
+    });
+  }, [normalizedQuery]);
+
   const handleNodeClick = (node) => {
     setSelectedProjectId(node.id);
   };
@@ -130,8 +162,8 @@ function Portfolio() {
       <div className="portfolio-header">
         <div className="portfolio-header-text">
           <h1 className="portfolio-title">My Little Creations</h1>
-          <p className="description">
-            Tap a dot to view a project.
+          <p className="description portfolio-subtitle">
+            Hover to preview and tap to learn more!
           </p>
         </div>
         <div className= "peek-section">
@@ -176,70 +208,199 @@ function Portfolio() {
         </div>
       </div>
 
-      {/*Graph*/}
-      <div className="graph-container">
-        <ForceGraph2D
-          ref={fgRef}
-          width={window.innerWidth}
-          height={window.innerHeight * 0.75}
-          graphData={graphData}
-          backgroundColor="#ffffff"
-          nodeRelSize={3}
-          linkWidth={3}
-          
-          onNodeHover={setHoveredNode}
-          onNodeClick={handleNodeClick}
-          d3AlphaDecay={0.05}
-          d3VelocityDecay={0.5}
-          d3Force={{
-            charge: { strength: -10 },
-            center: { strength: 0.5 },
-            collide: { radius: 20 }
-          }}
-          
+      {/*Graph or Mobile Grid*/}
+      {isMobile ? (
+        <div className="mobile-grid-container">
+          <div className="mobile-grid">
+            {filteredProjects.map((project) => (
+              <div
+                key={project.id}
+                className="mobile-mini-card"
+                onClick={() => setSelectedProjectId(project.id)}
+              >
+                {project?.images?.[0] && (
+                  <img 
+                    src={project.images[0]} 
+                    alt={project.title}
+                    className="mobile-mini-card-image"
+                  />
+                )}
+                <div className="mobile-mini-card-content">
+                  <h4>{project.title}</h4>
+                  <p>{project.subtitle}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="graph-container">
+          <ForceGraph2D
+            ref={fgRef}
+            width={window.innerWidth}
+            height={window.innerHeight * 0.75}
+            graphData={graphData}
+            backgroundColor="#ffffff"
+            nodeRelSize={3}
+            linkWidth={3}
+            
 
-          linkColor={(link) => {
-            if (!normalizedQuery) return "#b2d4fa9d";
+            onNodeDragEnd={(node) => {
+              // Remove fixed positions to allow nodes to be dragged again
+              node.fx = undefined;
+              node.fy = undefined;
+            }}
+            onNodeHover={(node, prevNode) => {
+              setHoveredNode(node || null);
+            }}
+            onNodeMove={(node, event) => {
+              if (event) {
+                setHoverPosition({
+                  x: event.clientX,
+                  y: event.clientY
+                });
+              }
+            }}
 
-            const sourceMatch = nodeMatchesSearch(link.source);
-            const targetMatch = nodeMatchesSearch(link.target);
+            onNodeClick={handleNodeClick}
+            d3AlphaDecay={0.02}
+            d3VelocityDecay={0.4}
+            cooldownTicks={100}
+            onEngineStop={() => {
 
-            return sourceMatch && targetMatch
-              ? "#8eb4df93"
-              : "rgba(200,200,200,0.2)";
-          }}
-          nodeCanvasObject={(node, ctx, globalScale) => {
-            const label = node.title;
-            const fontSize = 12 / globalScale;
-            const isHovered = hoveredNode?.id === node.id;
-            const matches = nodeMatchesSearch(node);
+              if (fgRef.current) {
+                const width = window.innerWidth;
+                const height = window.innerHeight * 0.75;
+                const margin = 100; 
+                
+                graphData.nodes.forEach(node => {
+                  if (node.x < -width/2 + margin) node.x = -width/2 + margin;
+                  if (node.x > width/2 - margin) node.x = width/2 - margin;
+                  
+                  if (node.y < -height/2 + margin) node.y = -height/2 + margin;
+                  if (node.y > height/2 - margin) node.y = height/2 - margin;
+                });
+              }
+            }}
+            d3Force={{
+              charge: { strength: -150, distanceMax: 250 },
+              link: { distance: 80, strength: 0.7 },
+              center: { strength: 0.8 },
+              collide: { radius: 40, strength: 0.9 },
+              
+              linkRepulsion: () => {
+                const linkRepelStrength = 25;
+                const linkRepelDistance = 20;
+                
+                return (alpha) => {
+                  graphData.links.forEach(link => {
+                    const source = typeof link.source === 'object' ? link.source : graphData.nodes.find(n => n.id === link.source);
+                    const target = typeof link.target === 'object' ? link.target : graphData.nodes.find(n => n.id === link.target);
+                    
+                    if (!source || !target) return;
+                    
+                    graphData.nodes.forEach(node => {
+                      // link magic
+                      if (node.id === source.id || node.id === target.id) return;
+                      
+                      const dx = target.x - source.x;
+                      const dy = target.y - source.y;
+                      const lengthSq = dx * dx + dy * dy;
+                      
+                      if (lengthSq === 0) return;
+                      
+                      let t = ((node.x - source.x) * dx + (node.y - source.y) * dy) / lengthSq;
+                      t = Math.max(0, Math.min(1, t));
+                      
+                      const closestX = source.x + t * dx;
+                      const closestY = source.y + t * dy;
+                      
+                      const distX = node.x - closestX;
+                      const distY = node.y - closestY;
+                      const distance = Math.sqrt(distX * distX + distY * distY);
+                      
+                      if (distance < linkRepelDistance && distance > 0) {
+                        const force = (linkRepelDistance - distance) / distance * linkRepelStrength * alpha;
+                        node.vx += distX * force;
+                        node.vy += distY * force;
+                      }
+                    });
+                  });
+                };
+              }
+            }}
+            
 
-            const opacity = matches ? 1 : 0.2;
-            ctx.globalAlpha = opacity;
+            linkColor={(link) => {
+              if (!normalizedQuery) return "#b2d4fa9d";
 
-            ctx.beginPath();
-            ctx.arc(
-              node.x,
-              node.y,
-              isHovered ? 4 : 3,
-              0,
-              2 * Math.PI,
-              false
+              const sourceMatch = nodeMatchesSearch(link.source);
+              const targetMatch = nodeMatchesSearch(link.target);
+
+              return sourceMatch && targetMatch
+                ? "#8eb4df93"
+                : "rgba(200,200,200,0.2)";
+            }}
+            nodeCanvasObject={(node, ctx, globalScale) => {
+              const label = node.title;
+              const fontSize = 12 / globalScale;
+              const isHovered = hoveredNode?.id === node.id;
+              const matches = nodeMatchesSearch(node);
+
+              const opacity = matches ? 1 : 0.2;
+              ctx.globalAlpha = opacity;
+
+              ctx.beginPath();
+              ctx.arc(
+                node.x,
+                node.y,
+                isHovered ? 4 : 3,
+                0,
+                2 * Math.PI,
+                false
+              );
+
+              ctx.fillStyle = isHovered ? '#b2d4fa' : (matches ? '#b2d4fa' : '#999999');
+              ctx.fill();
+
+              ctx.font = `${fontSize}px Segoe UI`;
+              ctx.textAlign = "center";
+              ctx.textBaseline = "top";
+              ctx.fillStyle = "#666666";
+              ctx.fillText(label, node.x, node.y + 6);
+              ctx.globalAlpha = 1;
+
+            }}
+          />
+          {hoveredNode && (() => {
+            const project = projects.find(p => p.id === hoveredNode.id);
+            return (
+              <div
+                className="mini-card"
+                style={{
+                  position: "fixed",
+                  top: hoverPosition.y + 12,
+                  left: hoverPosition.x + 12,
+                  pointerEvents: "none",
+                  zIndex: 5
+                }}
+              >
+                {project?.images?.[0] && (
+                  <img 
+                    src={project.images[0]} 
+                    alt={project.title}
+                    className="mini-card-image"
+                  />
+                )}
+                <div className="mini-card-content">
+                  <h4>{project.title}</h4>
+                  <p>{project.subtitle}</p>
+                </div>
+              </div>
             );
-
-            ctx.fillStyle = isHovered ? '#b2d4fa' : (matches ? '#b2d4fa' : '#999999');
-            ctx.fill();
-
-            ctx.font = `${fontSize}px Segoe UI`;
-            ctx.textAlign = "center";
-            ctx.textBaseline = "top";
-            ctx.fillStyle = "#666666";
-            ctx.fillText(label, node.x, node.y + 6);
-            ctx.globalAlpha = 1;
-
-          }}
-        />
-      </div>
+          })()}
+        </div>
+      )}
 
       {/* Project Card */}
       {selectedProjectId && (

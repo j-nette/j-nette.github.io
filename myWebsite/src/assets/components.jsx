@@ -6,7 +6,7 @@ function Typing() {
 
   useEffect(() => {
     const typed = new Typed(typedElement.current, {
-      strings: ["Roboticist", "Software Developper", "Creator", "Community Builder"],
+      strings: ["Roboticist", "Scholar", "Technical Project Manager","Software Developer", "Creator", "Community Builder"],
       typeSpeed: 30,
       backSpeed: 20,
       loop: true,      
