@@ -26,7 +26,7 @@ h1 {
   margin-bottom: 0.75rem;
 }
 
-button {
+.button {
   padding: 0.875rem 2rem;
   font-size: 1rem;
   font-weight: 400;
@@ -42,14 +42,14 @@ button {
   user-select: none;   
 }
 
-button:hover {
+.button:hover {
   background-color: var(--sky-light);
   border-color: var(--sky-med);
   color: white;
 }
 
-button:focus,
-button:focus-visible {
+.button:focus,
+.button:focus-visible {
   outline: none;
 }
 
@@ -57,4 +57,9 @@ button:focus-visible {
   user-select: none;   
 }
 
-
+p {
+  margin: 0;
+  font-size: 15px;
+  color: var(--med-charcoal);
+  line-height: 1.4;
+}

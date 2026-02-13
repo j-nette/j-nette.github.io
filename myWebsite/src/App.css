@@ -21,6 +21,9 @@
   font-family: 'Segoe UI', sans-serif;
   line-height: 1.5;
   font-weight: 400;
+
+  caret-color: transparent;
+  --sidebar-width: 320px;
 }
 
 .app {
@@ -32,9 +35,19 @@
   background-size: cover; 
   background-position: center;
   background-repeat: repeat;
-  /*background-image: url('./assets/homeBG.png');*/
+
 
 }
+
+.page-title {
+    font-size: 1.75rem;
+}
+
+.description {
+  margin-bottom: 1.5rem;
+  font-style: italic;
+}
+
 
 /* Navigation Bar */
 .navbar {
@@ -100,14 +113,9 @@
   color: var(--sky-dark);
   font-weight: 400;
   margin-bottom: 0.5rem;
+  font-style: normal;
 }
 
-.description {
-  font-size: 1.125rem;
-  color: var(--med-charcoal);
-  font-style: italic;
-  margin-bottom: 2rem;
-}
 
 .button-group {
   display: flex;
@@ -157,6 +165,7 @@
 
 
 .graph-search input {
+  
   height: 40px;
   font-size: 1rem;
   width: 280px;
@@ -175,6 +184,7 @@
 .graph-search input:focus {
   outline: none;
   border-color: var(--sky-med);
+  caret-color: auto;
 }
 
 .graph-search input::placeholder {
@@ -205,6 +215,7 @@
 .graph-search {
   position: relative;
 }
+
 
 
 /* Project Card */
@@ -265,6 +276,7 @@
 .project-card-subtitle {
   margin-bottom: 0.25rem;
   margin-top: 0rem;
+  font-style: italic;
 }
 
 .project-card-title {
@@ -311,6 +323,7 @@
 .project-card-description p {
   color: var(--charcoal);
   line-height: 1.625;
+  text-align: left;
 }
 
 .project-card-link {
@@ -404,6 +417,11 @@
   width: 1.5rem;
 }
 
+
+
+
+
+
 /* Mini Card */
 .mini-card {
   background: white;
@@ -429,16 +447,14 @@
 
 .mini-card-content h4 {
   margin: 0 0 6px 0;
-  font-size: 15px;
+  font-size: 1.25rem;
   font-weight: 600;
   color: var(--charcoal);
-  line-height: 1.3;
 }
 
 .mini-card-content p {
   margin: 0;
   font-size: 13px;
-  color: var(--med-charcoal);
   line-height: 1.4;
   font-style: italic;
 }
@@ -508,7 +524,227 @@
 }
 
 
-/* Responsive design */
+/* About */
+.about-container {
+  display: block;
+  grid-template-columns: 1fr;
+  min-height: 100vh;
+  background-color: white;
+  font-family: 'Segoe UI', sans-serif;
+  color: var(--charcoal);
+}
+
+.about-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background-color: white;
+  border-right: 1px solid var(--light-charcoal);
+  overflow-y: auto;
+}
+
+.sidebar-content {
+  padding: 3rem 2rem;
+}
+
+.profile-section {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.profile-image-wrapper {
+  margin-bottom: 1.5rem;
+}
+
+.profile-image {
+  width: 160px;
+  height: 160px;
+  margin: 0 auto;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: white;
+}
+
+.profile-name {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 1rem;
+  color: var(--charcoal);
+}
+
+.sidebar-contact {
+  margin-top: 2rem;
+}
+
+.sidebar-section-title {
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--med-charcoal);
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.contact-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  color: var(--charcoal);
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.contact-link:hover {
+  background-color: var(--very-light-charcoal);
+  color: var(--sky-dark);
+  transform: translateX(4px);
+}
+
+.contact-icon-small {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--white);
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  border: 2px solid var(--med-charcoal);
+  color: var(--med-charcoal);
+ 
+}
+
+.contact-link:hover .contact-icon-small {
+  background-color: var(--sky-light);
+  border-color: var(--sky-med);
+  color: white;
+}
+
+
+
+.contact-link span {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.about-main {
+  margin-left: var(--sidebar-width);
+  padding: 3rem 4rem;
+  max-width: 75%;
+}
+
+.about-me-section {
+  margin-bottom: 4rem;
+}
+
+.section-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: var(--charcoal);
+}
+
+.about-text {
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: var(--charcoal);
+  margin: 0;
+}
+
+.experience-section {
+  margin-bottom: 4rem;
+}
+
+.timeline {
+  position: relative;
+  border-left: 2px solid var(--light-charcoal);
+  margin-left: 8px;
+  padding-left: 40px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 3rem;
+  width: 100%;
+}
+
+.timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -46px;
+  top: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: white;
+  border: 2px solid var(--sky-med);
+  transition: all 0.2s ease;
+}
+
+.timeline-content {
+  width: 100%;
+  display: block;
+  box-sizing: border-box;
+}
+
+.timeline-date {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--med-charcoal);
+  margin-bottom: 0.25rem;
+  font-feature-settings: "tnum";
+}
+
+.timeline-role {
+  font-size: 1.25rem;
+  font-weight: 600;
+
+  color: var(--charcoal);
+}
+
+.timeline-company {
+  font-size: 1rem;
+  font-weight: 400;
+  margin: 0 0 0.55rem 0;
+  color: var(--sky-dark);
+}
+
+
+
+.profile-image img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+}
+
+.main-profile-image {
+  width: 100%;
+  height: 320px; /* adjust height as desired */
+  overflow: hidden;
+  margin-bottom: 3rem;
+}
+
+.main-profile-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+
+
+
+
 @media (max-width: 768px) {
   .navbar {
     padding: 1rem 1.25rem;
@@ -520,6 +756,7 @@
     gap: 1.5rem;
     font-size: 0.9rem;
   }
+
   
   .container {
     flex-direction: column;
@@ -551,21 +788,17 @@
     width: 100%;
   }
 
-  .portfolio-title {
-    font-size: 1.75rem;
-  }
-
   .description {
     font-size: 1rem;
   }
 
   .peek-section {
-    margin-top: 0.65rem;
+    margin-top: 6.2rem;
   }
 
   .graph-search {
     width: 100%;
-    margin-top: 0;
+    margin-top: 4rem;
   }
 
   .graph-search input {
@@ -601,5 +834,73 @@
 
   .project-card-content {
     padding: 1.25rem;
+  }
+
+    .about-container {
+    grid-template-columns: 1fr;
+    display: block;
+  }
+  
+  .about-sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--light-charcoal);
+  }
+  
+  .sidebar-content {
+    padding: 2rem 1.25rem;
+  }
+  
+  .profile-image {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .about-main {
+    margin-left: 0;
+    padding: 2rem 1.25rem;
+  }
+  
+  .section-title {
+    font-size: 1.5rem;
+  }
+  
+  .about-text {
+    font-size: 1rem;
+  }
+  
+  .timeline {
+    padding-left: 30px;
+  }
+  
+  .timeline-dot {
+    left: -36px;
+  }
+  
+  .timeline-role {
+    font-size: 1.125rem;
+  }
+  
+  .timeline-company {
+    font-size: 0.9375rem;
+  }
+  
+  .timeline-desc {
+    font-size: 0.9375rem;
+    text-align: left;
+  }
+}
+
+
+/* need to merge */
+@media (max-width: 968px) {
+  :root {
+    --sidebar-width: 280px;
+  }
+  
+  .about-main {
+    padding: 2rem 3rem;
   }
 }

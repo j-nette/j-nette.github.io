@@ -20,7 +20,7 @@ function Portfolio() {
 
   const fgRef = useRef();
 
-  // Detect mobile/desktop on resize
+  // mobile/desktop resize?
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -29,8 +29,9 @@ function Portfolio() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+  
 
-  // close search with esc
+  // close search with esc need to implement click outside... it's not working
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
@@ -163,7 +164,7 @@ function Portfolio() {
         <div className="portfolio-header-text">
           <h1 className="portfolio-title">My Little Creations</h1>
           <p className="description portfolio-subtitle">
-            Hover to preview and tap to learn more!
+            Hover over a dot to preview and tap it to learn more.
           </p>
         </div>
         <div className= "peek-section">
@@ -174,7 +175,6 @@ function Portfolio() {
                 />
             </div>
         </div>
-
 
         {/*Search*/}
         <div
@@ -208,7 +208,7 @@ function Portfolio() {
         </div>
       </div>
 
-      {/*Graph or Mobile Grid*/}
+      {/*reponsiveness*/}
       {isMobile ? (
         <div className="mobile-grid-container">
           <div className="mobile-grid">
@@ -240,48 +240,26 @@ function Portfolio() {
             width={window.innerWidth}
             height={window.innerHeight * 0.75}
             graphData={graphData}
-            backgroundColor="#ffffff"
+            //backgroundColor="#ffffff"
             nodeRelSize={3}
             linkWidth={3}
             
 
             onNodeDragEnd={(node) => {
-              // Remove fixed positions to allow nodes to be dragged again
               node.fx = undefined;
               node.fy = undefined;
             }}
-            onNodeHover={(node, prevNode) => {
+
+            //wip make card appear on top of node?
+            onNodeHover={(node) => {
               setHoveredNode(node || null);
             }}
-            onNodeMove={(node, event) => {
-              if (event) {
-                setHoverPosition({
-                  x: event.clientX,
-                  y: event.clientY
-                });
-              }
-            }}
-
+            
             onNodeClick={handleNodeClick}
             d3AlphaDecay={0.02}
-            d3VelocityDecay={0.4}
+            d3VelocityDecay={0.2}
             cooldownTicks={100}
-            onEngineStop={() => {
-
-              if (fgRef.current) {
-                const width = window.innerWidth;
-                const height = window.innerHeight * 0.75;
-                const margin = 100; 
-                
-                graphData.nodes.forEach(node => {
-                  if (node.x < -width/2 + margin) node.x = -width/2 + margin;
-                  if (node.x > width/2 - margin) node.x = width/2 - margin;
-                  
-                  if (node.y < -height/2 + margin) node.y = -height/2 + margin;
-                  if (node.y > height/2 - margin) node.y = height/2 - margin;
-                });
-              }
-            }}
+            
             d3Force={{
               charge: { strength: -150, distanceMax: 250 },
               link: { distance: 80, strength: 0.7 },
