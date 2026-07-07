@@ -149,6 +149,10 @@
 }
 
 .suggestion-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
   padding: 0.475rem 1.125rem;
   height: 40px;
   cursor: pointer;
@@ -161,6 +165,27 @@
 .suggestion-item:hover {
   background-color: var(--sky-very-light);
   color: var(--sky-dark);
+}
+
+.suggestion-term {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.suggestion-type {
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--med-charcoal);
+  background-color: var(--sky-very-light);
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+}
+
+.suggestion-item:hover .suggestion-type {
+  background-color: white;
 }
 
 
