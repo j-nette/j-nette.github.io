@@ -1,5 +1,6 @@
 import { useMemo, useState, useRef, useEffect } from "react";
 import ForceGraph2D from "react-force-graph-2d";
+import { forceCollide } from "d3-force-3d";
 import projects from "../assets/projects";
 import "../App.css";
 import ProjectCard from "./Project";
@@ -7,23 +8,62 @@ import ProjectCard from "./Project";
 import peekImage from '../assets/peek.png';
 
 
+// Scores how well a project matches the search query. Title / tags / technologies
+// are primary matches (score 2); words found only in the subtitle or card
+// descriptions are a lower-priority match (score 1) so those cards rank below
+// direct skill/title hits. Returns 0 when nothing matches.
+const getProjectMatchScore = (project, query) => {
+  if (!query) return 1;
+
+  const includesQuery = (value) => value?.toLowerCase().includes(query);
+
+  const primaryMatch =
+    includesQuery(project.title) ||
+    project.tags?.some(includesQuery) ||
+    project.technologies?.some(includesQuery);
+
+  if (primaryMatch) return 2;
+
+  const descriptionMatch = [
+    project.subtitle,
+    project.description1,
+    project.description2,
+  ].some(includesQuery);
+
+  return descriptionMatch ? 1 : 0;
+};
+
+
 function Portfolio() {
+  // Set to true to show the interactive project graph, or false to show the
+  // project cards instead. (Mobile always falls back to the cards.)
+  const graph_mode = false;
+
   const [hoveredNode, setHoveredNode] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [hoverPosition, setHoverPosition] = useState({ x: 0, y: 0 });
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [dimensions, setDimensions] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight * 0.75,
+  });
 
   const searchRef = useRef(null);
   const normalizedQuery = searchQuery.toLowerCase().trim();
 
   const fgRef = useRef();
+  const didInitialZoom = useRef(false);
 
   // mobile/desktop resize?
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
+      setDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight * 0.75,
+      });
     };
 
     window.addEventListener('resize', handleResize);
@@ -54,32 +94,73 @@ function Portfolio() {
     };
   }, []);
 
+  // react-force-graph exposes the simulation forces through the ref method
+  // fgRef.current.d3Force(...), NOT through a `d3Force` prop. Configuring them
+  // here gives the nodes real repulsion/spacing/collision so the graph settles
+  // into an untangled layout instead of relying on the weak default forces.
+  useEffect(() => {
+    const fg = fgRef.current;
+    if (!fg) return;
+
+    fg.d3Force("charge").strength(-200).distanceMax(400);
+    fg.d3Force("link").distance(70).strength(1);
+    fg.d3Force("center").strength(0.05);
+    fg.d3Force("collide", forceCollide(26));
+
+    fg.d3ReheatSimulation();
+  }, []);
+
    
 
   //search
   const allSearchTerms = useMemo(() => {
-    const terms = new Set();
+    // De-duplicated index of searchable terms, each tagged with a type label and
+    // a popularity count (how many projects use it) so hints can be ranked.
+    const index = new Map();
+
+    const add = (rawTerm, type) => {
+      if (!rawTerm) return;
+      const key = rawTerm.toLowerCase();
+      const existing = index.get(key);
+      if (existing) {
+        existing.count += 1;
+      } else {
+        index.set(key, { term: rawTerm, type, count: 1 });
+      }
+    };
 
     projects.forEach((project) => {
-      terms.add(project.title);
-
-      project.tags?.forEach((tag) => terms.add(tag));
-      project.technologies?.forEach((tech) => terms.add(tech));
+      add(project.title, "Project");
+      project.tags?.forEach((tag) => add(tag, "Skill"));
+      project.technologies?.forEach((tech) => add(tech, "Skill"));
     });
 
-    return Array.from(terms);
+    return Array.from(index.values());
   }, []);
 
   const suggestions = useMemo(() => {
+    // No query yet: hint the most popular skills/projects.
     if (!normalizedQuery) {
-      return allSearchTerms.slice(0, 3);
+      return [...allSearchTerms]
+        .sort((a, b) => b.count - a.count || a.term.localeCompare(b.term))
+        .slice(0, 5)
+        .map((entry) => ({ ...entry, starts: false }));
     }
 
+    // With a query: prefix matches rank above mid-string matches, then by
+    // popularity, then alphabetically.
     return allSearchTerms
-      .filter((term) =>
-        term.toLowerCase().includes(normalizedQuery)
-      )
-      .slice(0, 3);
+      .filter((entry) => entry.term.toLowerCase().includes(normalizedQuery))
+      .map((entry) => ({
+        ...entry,
+        starts: entry.term.toLowerCase().startsWith(normalizedQuery),
+      }))
+      .sort((a, b) => {
+        if (a.starts !== b.starts) return a.starts ? -1 : 1;
+        if (b.count !== a.count) return b.count - a.count;
+        return a.term.localeCompare(b.term);
+      })
+      .slice(0, 5);
   }, [normalizedQuery, allSearchTerms]);
 
   // graph
@@ -90,6 +171,15 @@ function Portfolio() {
       tags: project.tags,
       technologies: project.technologies
     }));
+
+    // Spread the initial positions around a circle so the graph spawns
+    // untangled instead of every node stacking at the origin.
+    const radius = 160;
+    nodes.forEach((node, index) => {
+      const angle = (index / nodes.length) * 2 * Math.PI;
+      node.x = radius * Math.cos(angle);
+      node.y = radius * Math.sin(angle);
+    });
 
     const links = [];
     for (let i = 0; i < nodes.length; i++) {
@@ -114,39 +204,26 @@ function Portfolio() {
   const nodeMatchesSearch = (node) => {
     if (!normalizedQuery) return true;
 
-    const titleMatch = node.title
-      .toLowerCase()
-      .includes(normalizedQuery);
-
-    const tagMatch = node.tags?.some((tag) =>
-      tag.toLowerCase().includes(normalizedQuery)
-    );
-
-    const techMatch = node.technologies?.some((tech) =>
-      tech.toLowerCase().includes(normalizedQuery)
-    );
-
-    return titleMatch || tagMatch || techMatch;
+    // Nodes only carry a subset of fields, so score against the full project
+    // (which includes the descriptions) when available.
+    const project = projects.find((p) => p.id === node.id) ?? node;
+    return getProjectMatchScore(project, normalizedQuery) > 0;
   };
 
   const filteredProjects = useMemo(() => {
-    return projects.filter(project => {
-      if (!normalizedQuery) return true;
+    if (!normalizedQuery) return projects;
 
-      const titleMatch = project.title
-        .toLowerCase()
-        .includes(normalizedQuery);
-
-      const tagMatch = project.tags?.some((tag) =>
-        tag.toLowerCase().includes(normalizedQuery)
-      );
-
-      const techMatch = project.technologies?.some((tech) =>
-        tech.toLowerCase().includes(normalizedQuery)
-      );
-
-      return titleMatch || tagMatch || techMatch;
-    });
+    // Keep every project that matches, then sort so primary (title/tag/tech)
+    // matches come before description-only matches. Array.sort is stable, so
+    // projects within the same tier keep their original order.
+    return projects
+      .map((project) => ({
+        project,
+        score: getProjectMatchScore(project, normalizedQuery),
+      }))
+      .filter((entry) => entry.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map((entry) => entry.project);
   }, [normalizedQuery]);
 
   const handleNodeClick = (node) => {
@@ -157,6 +234,31 @@ function Portfolio() {
     setSelectedProjectId(null);
   };
 
+  // Keep a node inside the visible graph container. When a node reaches an edge
+  // its velocity is reflected (and damped) so it bounces back instead of drifting
+  // off screen. Uses screen<->graph conversion so it holds at any zoom level.
+  const boundNodeToViewport = (node) => {
+    const fg = fgRef.current;
+    if (!fg) return;
+
+    const margin = 16;
+    const topLeft = fg.screen2GraphCoords(0, 0);
+    const bottomRight = fg.screen2GraphCoords(dimensions.width, dimensions.height);
+    const minX = Math.min(topLeft.x, bottomRight.x) + margin;
+    const maxX = Math.max(topLeft.x, bottomRight.x) - margin;
+    const minY = Math.min(topLeft.y, bottomRight.y) + margin;
+    const maxY = Math.max(topLeft.y, bottomRight.y) - margin;
+
+    if (node.x < minX) { node.x = minX; node.vx = Math.abs(node.vx || 0) * 0.6; }
+    else if (node.x > maxX) { node.x = maxX; node.vx = -Math.abs(node.vx || 0) * 0.6; }
+    if (node.y < minY) { node.y = minY; node.vy = Math.abs(node.vy || 0) * 0.6; }
+    else if (node.y > maxY) { node.y = maxY; node.vy = -Math.abs(node.vy || 0) * 0.6; }
+
+    // Keep a dragged node's fixed target within bounds too.
+    if (node.fx !== undefined) node.fx = Math.max(minX, Math.min(maxX, node.fx));
+    if (node.fy !== undefined) node.fy = Math.max(minY, Math.min(maxY, node.fy));
+  };
+
 
   return (
     <>
@@ -164,7 +266,9 @@ function Portfolio() {
         <div className="portfolio-header-text">
           <h1 className="portfolio-title">My Little Creations</h1>
           <p className="description portfolio-subtitle">
-            Hover over a dot to preview and tap it to learn more.
+            {graph_mode
+              ? "Hover over a dot to preview and tap it to learn more."
+              : "Click into a project card to learn more."}
           </p>
         </div>
         <div className= "peek-section">
@@ -196,11 +300,12 @@ function Portfolio() {
                   key={index}
                   className="suggestion-item"
                   onClick={() => {
-                    setSearchQuery(suggestion);
+                    setSearchQuery(suggestion.term);
                     setIsFocused(false);
                   }}
                 >
-                  {suggestion}
+                  <span className="suggestion-term">{suggestion.term}</span>
+                  <span className="suggestion-type">{suggestion.type}</span>
                 </div>
               ))}
             </div>
@@ -209,7 +314,7 @@ function Portfolio() {
       </div>
 
       {/*reponsiveness*/}
-      {isMobile ? (
+      {!graph_mode || isMobile ? (
         <div className="mobile-grid-container">
           <div className="mobile-grid">
             {filteredProjects.map((project) => (
@@ -234,20 +339,33 @@ function Portfolio() {
           </div>
         </div>
       ) : (
-        <div className="graph-container">
+        <div
+          className="graph-container"
+          onMouseMove={(e) => setHoverPosition({ x: e.clientX, y: e.clientY })}
+        >
           <ForceGraph2D
             ref={fgRef}
-            width={window.innerWidth}
-            height={window.innerHeight * 0.75}
+            width={dimensions.width}
+            height={dimensions.height}
             graphData={graphData}
             //backgroundColor="#ffffff"
             nodeRelSize={3}
             linkWidth={3}
+            minZoom={0.4}
+            maxZoom={8}
             
 
+            onNodeDrag={(node) => boundNodeToViewport(node)}
             onNodeDragEnd={(node) => {
               node.fx = undefined;
               node.fy = undefined;
+
+              // Bounce: re-energize the layout so it re-settles and untangles.
+              graphData.nodes.forEach((n) => {
+                n.vx = (n.vx || 0) + (Math.random() - 0.5) * 6;
+                n.vy = (n.vy || 0) + (Math.random() - 0.5) * 6;
+              });
+              fgRef.current?.d3ReheatSimulation();
             }}
 
             //wip make card appear on top of node?
@@ -257,57 +375,17 @@ function Portfolio() {
             
             onNodeClick={handleNodeClick}
             d3AlphaDecay={0.02}
-            d3VelocityDecay={0.2}
-            cooldownTicks={100}
-            
-            d3Force={{
-              charge: { strength: -150, distanceMax: 250 },
-              link: { distance: 80, strength: 0.7 },
-              center: { strength: 0.8 },
-              collide: { radius: 40, strength: 0.9 },
-              
-              linkRepulsion: () => {
-                const linkRepelStrength = 25;
-                const linkRepelDistance = 20;
-                
-                return (alpha) => {
-                  graphData.links.forEach(link => {
-                    const source = typeof link.source === 'object' ? link.source : graphData.nodes.find(n => n.id === link.source);
-                    const target = typeof link.target === 'object' ? link.target : graphData.nodes.find(n => n.id === link.target);
-                    
-                    if (!source || !target) return;
-                    
-                    graphData.nodes.forEach(node => {
-                      // link magic
-                      if (node.id === source.id || node.id === target.id) return;
-                      
-                      const dx = target.x - source.x;
-                      const dy = target.y - source.y;
-                      const lengthSq = dx * dx + dy * dy;
-                      
-                      if (lengthSq === 0) return;
-                      
-                      let t = ((node.x - source.x) * dx + (node.y - source.y) * dy) / lengthSq;
-                      t = Math.max(0, Math.min(1, t));
-                      
-                      const closestX = source.x + t * dx;
-                      const closestY = source.y + t * dy;
-                      
-                      const distX = node.x - closestX;
-                      const distY = node.y - closestY;
-                      const distance = Math.sqrt(distX * distX + distY * distY);
-                      
-                      if (distance < linkRepelDistance && distance > 0) {
-                        const force = (linkRepelDistance - distance) / distance * linkRepelStrength * alpha;
-                        node.vx += distX * force;
-                        node.vy += distY * force;
-                      }
-                    });
-                  });
-                };
+            d3VelocityDecay={0.4}
+            warmupTicks={60}
+            cooldownTicks={200}
+            onEngineTick={() => graphData.nodes.forEach(boundNodeToViewport)}
+            onEngineStop={() => {
+              if (!didInitialZoom.current) {
+                fgRef.current?.zoomToFit(400, 80);
+                didInitialZoom.current = true;
               }
             }}
-            
+
 
             linkColor={(link) => {
               if (!normalizedQuery) return "#b2d4fa9d";
