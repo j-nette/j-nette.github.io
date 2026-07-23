@@ -26,6 +26,15 @@
   --sidebar-width: 320px;
 }
 
+/* Keep a usable text cursor in editable fields even though the decorative
+   caret is hidden globally above. */
+input,
+textarea,
+select,
+[contenteditable="true"] {
+  caret-color: auto;
+}
+
 .app {
   width: 100%;
   min-height: 100vh;
@@ -41,6 +50,17 @@
 
 .page-title {
     font-size: 1.75rem;
+}
+
+.not-found {
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.5rem;
+  padding: 2rem;
 }
 
 .description {
