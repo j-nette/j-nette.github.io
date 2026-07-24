@@ -1,7 +1,10 @@
 import { useMemo, useState, useRef, useEffect } from "react";
 import ForceGraph2D from "react-force-graph-2d";
 import { forceCollide } from "d3-force-3d";
-import projects from "../assets/projects";
+import { Plus } from "lucide-react";
+import projectsData from "../assets/projects";
+import { Media } from "../components/Media";
+import { saveProjects } from "@authoring/api";
 import "../App.css";
 import ProjectCard from "./Project";
 
@@ -38,6 +41,15 @@ function Portfolio() {
   // Set to true to show the interactive project graph, or false to show the
   // project cards instead. (Mobile always falls back to the cards.)
   const graph_mode = false;
+
+  // Build-time gate: false literal in production; strips authoring UI + save calls.
+  const authoring = import.meta.env.DEV;
+
+  // Dev-editable working copy of the project list (seeded from source data).
+  const [items, setItems] = useState(projectsData);
+  const [draftProject, setDraftProject] = useState(null);
+  const [dragIndex, setDragIndex] = useState(null);
+  const [dragOverIndex, setDragOverIndex] = useState(null);
 
   const [hoveredNode, setHoveredNode] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -129,14 +141,14 @@ function Portfolio() {
       }
     };
 
-    projects.forEach((project) => {
+    items.forEach((project) => {
       add(project.title, "Project");
       project.tags?.forEach((tag) => add(tag, "Skill"));
       project.technologies?.forEach((tech) => add(tech, "Skill"));
     });
 
     return Array.from(index.values());
-  }, []);
+  }, [items]);
 
   const suggestions = useMemo(() => {
     // No query yet: hint the most popular skills/projects.
@@ -165,7 +177,7 @@ function Portfolio() {
 
   // graph
   const graphData = useMemo(() => {
-    const nodes = projects.map((project) => ({
+    const nodes = items.map((project) => ({
       id: project.id,
       title: project.title,
       tags: project.tags,
@@ -199,24 +211,24 @@ function Portfolio() {
     }
 
     return { nodes, links };
-  }, []);
+  }, [items]);
 
   const nodeMatchesSearch = (node) => {
     if (!normalizedQuery) return true;
 
     // Nodes only carry a subset of fields, so score against the full project
     // (which includes the descriptions) when available.
-    const project = projects.find((p) => p.id === node.id) ?? node;
+    const project = items.find((p) => p.id === node.id) ?? node;
     return getProjectMatchScore(project, normalizedQuery) > 0;
   };
 
   const filteredProjects = useMemo(() => {
-    if (!normalizedQuery) return projects;
+    if (!normalizedQuery) return items;
 
     // Keep every project that matches, then sort so primary (title/tag/tech)
     // matches come before description-only matches. Array.sort is stable, so
     // projects within the same tier keep their original order.
-    return projects
+    return items
       .map((project) => ({
         project,
         score: getProjectMatchScore(project, normalizedQuery),
@@ -224,7 +236,7 @@ function Portfolio() {
       .filter((entry) => entry.score > 0)
       .sort((a, b) => b.score - a.score)
       .map((entry) => entry.project);
-  }, [normalizedQuery]);
+  }, [normalizedQuery, items]);
 
   const handleNodeClick = (node) => {
     setSelectedProjectId(node.id);
@@ -232,6 +244,67 @@ function Portfolio() {
 
   const handleCloseCard = () => {
     setSelectedProjectId(null);
+    setDraftProject(null);
+  };
+
+  // The selected project is either the in-progress new draft or an existing item.
+  const selectedProject =
+    draftProject && draftProject.id === selectedProjectId
+      ? draftProject
+      : items.find((p) => p.id === selectedProjectId) || null;
+
+  const persistProjects = async (list) => {
+    setItems(list);
+    if (authoring) {
+      try {
+        await saveProjects(list);
+      } catch (err) {
+        alert(`Could not save projects to source: ${err.message}`);
+      }
+    }
+  };
+
+  const handleSaveProject = async (updated) => {
+    const exists = items.some((p) => p.id === updated.id);
+    const list = exists
+      ? items.map((p) => (p.id === updated.id ? updated : p))
+      : [...items, updated];
+    await persistProjects(list);
+    setDraftProject(null);
+  };
+
+  const handleDeleteProject = async (id) => {
+    await persistProjects(items.filter((p) => p.id !== id));
+    setDraftProject(null);
+    setSelectedProjectId(null);
+  };
+
+  const handleAddProject = () => {
+    const id = `project-${Date.now()}`;
+    setDraftProject({
+      id,
+      title: "New Project",
+      subtitle: "",
+      description1: "",
+      description2: "",
+      tags: [],
+      technologies: [],
+      links: {},
+      images: [],
+    });
+    setSelectedProjectId(id);
+  };
+
+  // Drag-to-reorder is dev-only and disabled while a search filter is active
+  // (so card indices map 1:1 to the underlying list order).
+  const canReorder = authoring && !normalizedQuery;
+
+  const handleReorderProjects = (from, to) => {
+    if (from == null || to == null || from === to) return;
+    const list = [...items];
+    const [moved] = list.splice(from, 1);
+    list.splice(to, 0, moved);
+    persistProjects(list);
   };
 
   // Keep a node inside the visible graph container. When a node reaches an edge
@@ -317,15 +390,54 @@ function Portfolio() {
       {!graph_mode || isMobile ? (
         <div className="mobile-grid-container">
           <div className="mobile-grid">
-            {filteredProjects.map((project) => (
+            {filteredProjects.map((project, index) => (
               <div
                 key={project.id}
-                className="mobile-mini-card"
+                className={`mobile-mini-card${
+                  canReorder && dragIndex === index ? " dragging" : ""
+                }${
+                  canReorder && dragOverIndex === index && dragIndex !== index
+                    ? " drag-over"
+                    : ""
+                }`}
                 onClick={() => setSelectedProjectId(project.id)}
+                draggable={canReorder}
+                onDragStart={
+                  canReorder ? () => setDragIndex(index) : undefined
+                }
+                onDragOver={
+                  canReorder
+                    ? (e) => {
+                        e.preventDefault();
+                        setDragOverIndex(index);
+                      }
+                    : undefined
+                }
+                onDragLeave={
+                  canReorder ? () => setDragOverIndex(null) : undefined
+                }
+                onDrop={
+                  canReorder
+                    ? (e) => {
+                        e.preventDefault();
+                        handleReorderProjects(dragIndex, index);
+                        setDragIndex(null);
+                        setDragOverIndex(null);
+                      }
+                    : undefined
+                }
+                onDragEnd={
+                  canReorder
+                    ? () => {
+                        setDragIndex(null);
+                        setDragOverIndex(null);
+                      }
+                    : undefined
+                }
               >
                 {project?.images?.[0] && (
-                  <img 
-                    src={project.images[0]} 
+                  <Media
+                    filename={project.images[0]}
                     alt={project.title}
                     className="mobile-mini-card-image"
                   />
@@ -336,6 +448,16 @@ function Portfolio() {
                 </div>
               </div>
             ))}
+            {authoring && (
+              <button
+                type="button"
+                className="mobile-mini-card dev-add-tile"
+                onClick={handleAddProject}
+              >
+                <Plus size={28} />
+                <span>Add project</span>
+              </button>
+            )}
           </div>
         </div>
       ) : (
@@ -429,7 +551,7 @@ function Portfolio() {
             }}
           />
           {hoveredNode && (() => {
-            const project = projects.find(p => p.id === hoveredNode.id);
+            const project = items.find(p => p.id === hoveredNode.id);
             return (
               <div
                 className="mini-card"
@@ -442,8 +564,8 @@ function Portfolio() {
                 }}
               >
                 {project?.images?.[0] && (
-                  <img 
-                    src={project.images[0]} 
+                  <Media
+                    filename={project.images[0]}
                     alt={project.title}
                     className="mini-card-image"
                   />
@@ -459,10 +581,14 @@ function Portfolio() {
       )}
 
       {/* Project Card */}
-      {selectedProjectId && (
-        <ProjectCard 
-          projectId={selectedProjectId} 
+      {selectedProject && (
+        <ProjectCard
+          project={selectedProject}
           onClose={handleCloseCard}
+          onSave={handleSaveProject}
+          onDelete={handleDeleteProject}
+          canEdit={authoring}
+          startInEdit={!!draftProject && draftProject.id === selectedProjectId}
         />
       )}
     </>
