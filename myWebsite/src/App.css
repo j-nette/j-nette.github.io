@@ -929,6 +929,29 @@ html::-webkit-scrollbar {
   color: var(--charcoal);
 }
 
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--light-charcoal);
+}
+
+.sidebar-nav-link {
+  padding: 0.6rem 0.75rem;
+  border-radius: 4px;
+  color: var(--charcoal);
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.sidebar-nav-link:hover {
+  background-color: var(--very-light-charcoal);
+  color: var(--sky-dark);
+  transform: translateX(4px);
+}
+
 .sidebar-contact {
   margin-top: 2rem;
 }

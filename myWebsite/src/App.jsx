@@ -4,7 +4,7 @@ import { Moon, Sun } from 'lucide-react';
 import cloudImage from './assets/cloud.png';
 import Typing from './assets/components';
 
-import { HashRouter, Routes, Route, Link } from 'react-router-dom';
+import { HashRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import About from './pages/About';
 import Portfolio from './pages/Portfolio';
 import Daydreams from './pages/Daydreams';
@@ -54,6 +54,36 @@ function Home() {
   );
 }
 
+function NavBar({ theme, toggleTheme }) {
+  const location = useLocation();
+
+  // The About page has its own left sidebar with navigation, so the global
+  // top navbar is hidden there to avoid cluttering that column.
+  if (location.pathname === '/about') return null;
+
+  return (
+    <nav className="navbar">
+      <ul className="nav-links">
+        <li className='nav-link'><Link to="/">Home</Link></li>
+        <li className='nav-link'><Link to="/portfolio">Portfolio</Link></li>
+        <li className='nav-link'><Link to="/daydreams">Daydreams</Link></li>
+        <li className='nav-link'><Link to="/about">About</Link></li>
+
+      </ul>
+      {THEME_TOGGLE_ENABLED && (
+        <button
+          className="theme-toggle"
+          onClick={toggleTheme}
+          aria-label={theme === "dark" ? "Switch to day mode" : "Switch to night mode"}
+          title={theme === "dark" ? "Day mode" : "Night mode"}
+        >
+          {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+        </button>
+      )}
+    </nav>
+  );
+}
+
 function App() {
   const [theme, setTheme] = useState(
     () => (THEME_TOGGLE_ENABLED && localStorage.getItem("theme")) || "light"
@@ -72,25 +102,7 @@ function App() {
 
   return (
     <HashRouter>
-      <nav className="navbar">
-        <ul className="nav-links">
-          <li className='nav-link'><Link to="/">Home</Link></li>
-          <li className='nav-link'><Link to="/portfolio">Portfolio</Link></li>
-          <li className='nav-link'><Link to="/daydreams">Daydreams</Link></li>
-          <li className='nav-link'><Link to="/about">About</Link></li>
-
-        </ul>
-        {THEME_TOGGLE_ENABLED && (
-          <button
-            className="theme-toggle"
-            onClick={toggleTheme}
-            aria-label={theme === "dark" ? "Switch to day mode" : "Switch to night mode"}
-            title={theme === "dark" ? "Day mode" : "Night mode"}
-          >
-            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
-        )}
-      </nav>
+      <NavBar theme={theme} toggleTheme={toggleTheme} />
 
       <Routes>
         {/* Home page */}

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import '../App.css';
 import { Plus, Trash2 } from 'lucide-react';
 import { experiences as experiencesData } from '../assets/experiences';
@@ -60,6 +61,12 @@ const About = () => {
             <p>Mechatronics Engineering @ UBC</p>
             <p>Schulich Leader Scholar</p>
           </div>
+
+          <nav className="sidebar-nav">
+            <Link to="/" className="sidebar-nav-link">Home</Link>
+            <Link to="/portfolio" className="sidebar-nav-link">Portfolio</Link>
+            <Link to="/daydreams" className="sidebar-nav-link">Daydreams</Link>
+          </nav>
           
           <div className="sidebar-contact">
             <h2 className="sidebar-section-title">Contact</h2>
