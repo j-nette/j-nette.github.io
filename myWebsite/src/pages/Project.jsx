@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, ChevronLeft, ChevronRight, Pencil, Trash2 } from 'lucide-react';
 import { Media, isVideoFile } from '../components/Media';
 import { getMediaPath } from '../assets/projects';
-import { EditableText, TagEditor, MediaEditor } from '../components/EditControls';
+import { EditableText, TagEditor, MediaEditor } from '@authoring/controls';
 import '../App.css';
 
 export default function ProjectCard({
@@ -14,9 +14,14 @@ export default function ProjectCard({
   startInEdit = false,
 }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [editing, setEditing] = useState(startInEdit);
+  const [editingState, setEditing] = useState(startInEdit);
   const [draft, setDraft] = useState(project);
   const [saving, setSaving] = useState(false);
+
+  // Build-time gate: import.meta.env.DEV is replaced with a literal false in
+  // production, so every editor branch below is eliminated from the bundle.
+  const authoring = import.meta.env.DEV;
+  const editing = authoring && editingState;
 
   useEffect(() => {
     setDraft(project);
@@ -68,7 +73,7 @@ export default function ProjectCard({
   return (
     <div className="project-card-overlay" onClick={onClose}>
       <div className="project-card-container" onClick={(e) => e.stopPropagation()}>
-        {canEdit && (
+        {authoring && canEdit && (
           <div className="dev-edit-bar">
             {editing ? (
               <>

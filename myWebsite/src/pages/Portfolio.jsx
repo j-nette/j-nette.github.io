@@ -4,7 +4,7 @@ import { forceCollide } from "d3-force-3d";
 import { Plus } from "lucide-react";
 import projectsData from "../assets/projects";
 import { Media } from "../components/Media";
-import { isDev, saveProjects } from "../dev/devApi";
+import { saveProjects } from "@authoring/api";
 import "../App.css";
 import ProjectCard from "./Project";
 
@@ -41,6 +41,9 @@ function Portfolio() {
   // Set to true to show the interactive project graph, or false to show the
   // project cards instead. (Mobile always falls back to the cards.)
   const graph_mode = false;
+
+  // Build-time gate: false literal in production; strips authoring UI + save calls.
+  const authoring = import.meta.env.DEV;
 
   // Dev-editable working copy of the project list (seeded from source data).
   const [items, setItems] = useState(projectsData);
@@ -252,7 +255,7 @@ function Portfolio() {
 
   const persistProjects = async (list) => {
     setItems(list);
-    if (isDev) {
+    if (authoring) {
       try {
         await saveProjects(list);
       } catch (err) {
@@ -294,7 +297,7 @@ function Portfolio() {
 
   // Drag-to-reorder is dev-only and disabled while a search filter is active
   // (so card indices map 1:1 to the underlying list order).
-  const canReorder = isDev && !normalizedQuery;
+  const canReorder = authoring && !normalizedQuery;
 
   const handleReorderProjects = (from, to) => {
     if (from == null || to == null || from === to) return;
@@ -445,7 +448,7 @@ function Portfolio() {
                 </div>
               </div>
             ))}
-            {isDev && (
+            {authoring && (
               <button
                 type="button"
                 className="mobile-mini-card dev-add-tile"
@@ -584,7 +587,7 @@ function Portfolio() {
           onClose={handleCloseCard}
           onSave={handleSaveProject}
           onDelete={handleDeleteProject}
-          canEdit={isDev}
+          canEdit={authoring}
           startInEdit={!!draftProject && draftProject.id === selectedProjectId}
         />
       )}

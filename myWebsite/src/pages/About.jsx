@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import '../App.css';
 import { Plus, Trash2 } from 'lucide-react';
 import { experiences as experiencesData } from '../assets/experiences';
-import { EditableText } from '../components/EditControls';
-import { isDev, saveExperiences } from '../dev/devApi';
+import { EditableText } from '@authoring/controls';
+import { saveExperiences } from '@authoring/api';
 
 import profImage from '../assets/homeBG.png';
 
@@ -11,6 +11,9 @@ const About = () => {
   const [items, setItems] = useState(experiencesData);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
+
+  // Build-time gate: false literal in production; strips authoring UI + save calls.
+  const authoring = import.meta.env.DEV;
 
   const setItem = (i, patch) => {
     setItems((list) => list.map((e, idx) => (idx === i ? { ...e, ...patch } : e)));
@@ -103,7 +106,7 @@ const About = () => {
         <section className="experience-section">
           <h2 className="section-title">Experience</h2>
 
-          {isDev && (
+          {authoring && (
             <div className="dev-edit-bar">
               <button className="dev-edit-btn" onClick={addItem}>
                 <Plus size={14} /> Add experience
@@ -123,7 +126,7 @@ const About = () => {
               <div key={index} className="timeline-item">
                 <div className="timeline-dot"></div>
                 <div className="timeline-content">
-                  {isDev ? (
+                  {authoring ? (
                     <>
                       <EditableText
                         value={exp.time}

@@ -11,8 +11,8 @@ import {
 } from "lucide-react";
 import daydreamsData, { getDaydreamMedia } from "../assets/daydreams";
 import { Media } from "../components/Media";
-import { EditableText, TagEditor } from "../components/EditControls";
-import { isDev, saveDaydreams, uploadMedia } from "../dev/devApi";
+import { EditableText, TagEditor } from "@authoring/controls";
+import { saveDaydreams, uploadMedia } from "@authoring/api";
 import cloudDefault from "../assets/homeBG.png";
 import "../App.css";
 
@@ -142,9 +142,13 @@ function DaydreamReader({
   onDelete,
   startInEdit = false,
 }) {
-  const [editing, setEditing] = useState(startInEdit);
+  const [editingState, setEditing] = useState(startInEdit);
   const [draft, setDraft] = useState(post);
   const [saving, setSaving] = useState(false);
+
+  // Build-time gate: false literal in production, so editor branches are stripped.
+  const authoring = import.meta.env.DEV;
+  const editing = authoring && editingState;
 
   useEffect(() => {
     setDraft(post);
@@ -176,7 +180,7 @@ function DaydreamReader({
   return (
     <div className="project-card-overlay" onClick={onClose}>
       <div className="project-card-container blog-reader" onClick={(e) => e.stopPropagation()}>
-        {canEdit && (
+        {authoring && canEdit && (
           <div className="dev-edit-bar">
             {editing ? (
               <>
@@ -305,6 +309,9 @@ function Daydreams() {
   const [draftPost, setDraftPost] = useState(null);
   const [selectedPostId, setSelectedPostId] = useState(null);
 
+  // Build-time gate: false literal in production; strips authoring UI + save calls.
+  const authoring = import.meta.env.DEV;
+
   const selectedPost =
     draftPost && draftPost.id === selectedPostId
       ? draftPost
@@ -397,7 +404,7 @@ function Daydreams() {
 
   const persist = async (list) => {
     setItems(list);
-    if (isDev) {
+    if (authoring) {
       try {
         await saveDaydreams(list);
       } catch (err) {
@@ -447,7 +454,7 @@ function Daydreams() {
           <p className="description blog-subtitle">
             A little corner for my thoughts, musings, and half-baked ideas.
           </p>
-          {isDev && (
+          {authoring && (
             <button className="dev-edit-btn blog-new-post" onClick={handleAddPost}>
               <Plus size={14} /> New post
             </button>
@@ -567,7 +574,7 @@ function Daydreams() {
         <DaydreamReader
           post={selectedPost}
           onClose={handleClose}
-          canEdit={isDev}
+          canEdit={authoring}
           onSave={handleSavePost}
           onDelete={handleDeletePost}
           startInEdit={!!draftPost && draftPost.id === selectedPostId}
