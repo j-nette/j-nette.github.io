@@ -8,12 +8,12 @@ const HIDE_DELAY = 900;
 // A press must last this long to count as "held" (avoids flashing on quick clicks).
 const HOLD_THRESHOLD = 140;
 
-// A custom, on-demand scroll position indicator. It renders a light-blue pill on
+// A custom, on-demand scroll position indicator. It renders a grey pill on
 // the right edge that only appears while the page is scrolling or the pointer is
 // held down, and fades away when the page is idle. The pill reflects the current
 // scroll position and can be dragged to scroll. The native page scrollbar is
-// hidden globally (see App.css); this replaces it. The pill sits below the sticky
-// navbar (both via a top offset and a lower z-index than the navbar).
+// hidden globally (see App.css); this replaces it. The pill starts below the
+// navbar via a top offset derived from the navbar's measured height.
 export default function ScrollIndicator() {
   const location = useLocation();
   const [thumb, setThumb] = useState({ top: 0, height: MIN_THUMB, show: false });
