@@ -46,6 +46,16 @@ const About = () => {
               <span>GitHub</span>
             </a>
 
+            <a href="mailto:placeholder@email.com" className="contact-link">
+              <div className="contact-icon-small">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                  <path d="m22 7-10 5L2 7"></path>
+                </svg>
+              </div>
+              <span>placeholder@email.com</span>
+            </a>
+
     
           </div>
         </div>

@@ -1,5 +1,11 @@
 export const experiences = [
   {
+    title: "Software Engineering (Internship)",
+    company: "Microsoft",
+    time: "May 2026 - Jul 2026",
+    description: "placeholder text"
+  },
+  {
     title: "Technical Program Manager - AI/HPC (Internship)",
     company: "AMD",
     time: "May 2025 - Apr 2026",

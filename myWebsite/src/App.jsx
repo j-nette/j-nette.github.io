@@ -5,6 +5,7 @@ import Typing from './assets/components';
 import { HashRouter, Routes, Route, Link } from 'react-router-dom';
 import About from './pages/About';
 import Portfolio from './pages/Portfolio';
+import Daydreams from './pages/Daydreams';
 
 
 function NotFound() {
@@ -26,6 +27,7 @@ function App() {
         <ul className="nav-links">
           <li className='nav-link'><Link to="/">Home</Link></li>
           <li className='nav-link'><Link to="/portfolio">Portfolio</Link></li>
+          <li className='nav-link'><Link to="/daydreams">Daydreams</Link></li>
           <li className='nav-link'><Link to="/about">About</Link></li>
 
         </ul>
@@ -61,6 +63,7 @@ function App() {
         {/* Other pages */}
         <Route path="/about" element={<About />} />
         <Route path="/portfolio" element={<Portfolio />} />
+        <Route path="/daydreams" element={<Daydreams />} />
 
         {/* Catch-all 404 */}
         <Route path="*" element={<NotFound />} />
