@@ -8,6 +8,7 @@ import { HashRouter, Routes, Route, Link } from 'react-router-dom';
 import About from './pages/About';
 import Portfolio from './pages/Portfolio';
 import Daydreams from './pages/Daydreams';
+import ScrollIndicator from './components/ScrollIndicator';
 
 // Toggle this to enable/disable the light/dark mode feature.
 // When false, the site stays in light mode and the toggle button is hidden.
@@ -27,12 +28,6 @@ function NotFound() {
 }
 
 function Home() {
-  // Hide the page scrollbar while on Home (scrolling still works).
-  useEffect(() => {
-    document.documentElement.classList.add("hide-scrollbar");
-    return () => document.documentElement.classList.remove("hide-scrollbar");
-  }, []);
-
   return (
     <div className="app">
       <div className="container">
@@ -109,6 +104,8 @@ function App() {
         {/* Catch-all 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
+
+      <ScrollIndicator />
     </HashRouter>
   );
 }

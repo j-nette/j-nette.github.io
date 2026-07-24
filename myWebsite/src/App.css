@@ -77,6 +77,10 @@ select,
   align-items: center;
   padding: 1.5rem 4rem;
   background-color: white;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
 }
 
 .nav-links {
@@ -198,15 +202,53 @@ select,
   padding: 0 2rem 4rem;
 }
 
-/* Hide the viewport scrollbar (kept scrollable) — toggled on the Daydreams page. */
-html.hide-scrollbar {
+/* The native root scrollbar is hidden globally; the custom ScrollIndicator
+   component provides an on-demand light-blue pill that shows scroll position.
+   Scrolling via wheel/touch/keyboard still works normally. */
+html {
   scrollbar-width: none;        /* Firefox */
   -ms-overflow-style: none;     /* IE/Edge legacy */
 }
-html.hide-scrollbar::-webkit-scrollbar {
+html::-webkit-scrollbar {
   width: 0;
   height: 0;
   display: none;                /* Chrome/Safari */
+}
+
+/* Custom scroll position indicator (pill). Sits below the sticky navbar via a
+   lower z-index and a top offset applied in JS; only visible while scrolling or
+   while the pointer is held. */
+.scroll-indicator {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 16px;
+  z-index: 90;
+  pointer-events: none;
+}
+.scroll-indicator-thumb {
+  position: absolute;
+  right: 4px;
+  width: 8px;
+  border-radius: 999px;
+  background-color: var(--sky-light);
+  box-shadow: 0 2px 6px rgba(97, 149, 209, 0.45);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: auto;
+  cursor: grab;
+  touch-action: none;
+}
+.scroll-indicator.is-visible .scroll-indicator-thumb {
+  opacity: 1;
+}
+.scroll-indicator-thumb:hover {
+  background-color: var(--sky-med);
+}
+.scroll-indicator-thumb:active {
+  cursor: grabbing;
+  background-color: var(--sky-dark);
 }
 
 /* Featured hero */
@@ -860,13 +902,6 @@ html.hide-scrollbar::-webkit-scrollbar {
   background-color: white;
   border-right: 1px solid var(--light-charcoal);
   overflow-y: auto;
-  scrollbar-width: none;        /* Firefox */
-  -ms-overflow-style: none;     /* IE/Edge legacy */
-}
-.about-sidebar::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-  display: none;                /* Chrome/Safari */
 }
 
 .sidebar-content {

@@ -81,12 +81,6 @@ function Portfolio() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  // Hide the page scrollbar while on Portfolio (scrolling still works).
-  useEffect(() => {
-    document.documentElement.classList.add("hide-scrollbar");
-    return () => document.documentElement.classList.remove("hide-scrollbar");
-  }, []);
   
 
   // close search with esc need to implement click outside... it's not working

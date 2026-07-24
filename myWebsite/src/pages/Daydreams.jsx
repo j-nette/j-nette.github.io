@@ -341,11 +341,6 @@ function Daydreams() {
     };
   }, []);
 
-  // Hide the page scrollbar while on Daydreams (scrolling still works).
-  useEffect(() => {
-    document.documentElement.classList.add("hide-scrollbar");
-    return () => document.documentElement.classList.remove("hide-scrollbar");
-  }, []);
 
   const postText = (post) =>
     (post.body || [])

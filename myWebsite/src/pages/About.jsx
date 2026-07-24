@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import '../App.css';
 import { Plus, Trash2 } from 'lucide-react';
 import { experiences as experiencesData } from '../assets/experiences';
@@ -14,12 +14,6 @@ const About = () => {
 
   // Build-time gate: false literal in production; strips authoring UI + save calls.
   const authoring = import.meta.env.DEV;
-
-  // Hide the page scrollbar while on About (scrolling still works).
-  useEffect(() => {
-    document.documentElement.classList.add("hide-scrollbar");
-    return () => document.documentElement.classList.remove("hide-scrollbar");
-  }, []);
 
   const setItem = (i, patch) => {
     setItems((list) => list.map((e, idx) => (idx === i ? { ...e, ...patch } : e)));
