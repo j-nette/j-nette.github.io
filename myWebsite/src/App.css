@@ -860,6 +860,13 @@ html.hide-scrollbar::-webkit-scrollbar {
   background-color: white;
   border-right: 1px solid var(--light-charcoal);
   overflow-y: auto;
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* IE/Edge legacy */
+}
+.about-sidebar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;                /* Chrome/Safari */
 }
 
 .sidebar-content {
