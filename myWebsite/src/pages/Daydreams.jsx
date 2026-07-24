@@ -14,6 +14,7 @@ import { Media } from "../components/Media";
 import { EditableText, TagEditor } from "@authoring/controls";
 import { saveDaydreams, uploadMedia } from "@authoring/api";
 import cloudDefault from "../assets/homeBG.png";
+import peekImage from "../assets/peek.png";
 import "../App.css";
 
 // First image block's filename in a post body, or null.
@@ -459,6 +460,15 @@ function Daydreams() {
               <Plus size={14} /> New post
             </button>
           )}
+        </div>
+
+        <div className="peek-section">
+            <div className="peek-image">
+                <img
+                src={peekImage}
+                alt="Peek-a-boo!"
+                />
+            </div>
         </div>
 
         {/* Search */}

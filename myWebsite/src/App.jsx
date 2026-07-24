@@ -26,6 +26,39 @@ function NotFound() {
   );
 }
 
+function Home() {
+  // Hide the page scrollbar while on Home (scrolling still works).
+  useEffect(() => {
+    document.documentElement.classList.add("hide-scrollbar");
+    return () => document.documentElement.classList.remove("hide-scrollbar");
+  }, []);
+
+  return (
+    <div className="app">
+      <div className="container">
+        <div className="left-section">
+          <div className="floating-image">
+            <img
+              src={cloudImage}
+              alt="My Sprite!"
+            />
+          </div>
+        </div>
+
+        <div className="right-section">
+          <h1 className="greeting">Hey, I'm Jeanette!</h1>
+          <Typing/>
+          <p className="description beep-boop">I like making things go beep boop.</p>
+          <div className="button-group">
+            <Link to="/portfolio" className="button">View My Work</Link>
+            <Link to="/about" className="button">Let's Connect</Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [theme, setTheme] = useState(
     () => (THEME_TOGGLE_ENABLED && localStorage.getItem("theme")) || "light"
@@ -66,30 +99,7 @@ function App() {
 
       <Routes>
         {/* Home page */}
-        <Route path="/" element={
-          <div className="app">
-            <div className="container">
-              <div className="left-section">
-                <div className="floating-image">
-                  <img 
-                    src={cloudImage} 
-                    alt="My Sprite!" 
-                  />
-                </div>
-              </div>
-              
-              <div className="right-section">
-                <h1 className="greeting">Hey, I'm Jeanette!</h1>
-                <Typing/>
-                <p className="description beep-boop">I like making things go beep boop.</p>
-                <div className="button-group">
-                  <Link to="/portfolio" className="button">View My Work</Link>
-                  <Link to="/about" className="button">Let's Connect</Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        } />
+        <Route path="/" element={<Home />} />
 
         {/* Other pages */}
         <Route path="/about" element={<About />} />
