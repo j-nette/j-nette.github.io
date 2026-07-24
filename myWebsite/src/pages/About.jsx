@@ -1,10 +1,45 @@
-import React from 'react';
+import React, { useState } from 'react';
 import '../App.css';
-import { experiences } from '../assets/experiences';
+import { Plus, Trash2 } from 'lucide-react';
+import { experiences as experiencesData } from '../assets/experiences';
+import { EditableText } from '../components/EditControls';
+import { isDev, saveExperiences } from '../dev/devApi';
 
 import profImage from '../assets/homeBG.png';
 
 const About = () => {
+  const [items, setItems] = useState(experiencesData);
+  const [saving, setSaving] = useState(false);
+  const [dirty, setDirty] = useState(false);
+
+  const setItem = (i, patch) => {
+    setItems((list) => list.map((e, idx) => (idx === i ? { ...e, ...patch } : e)));
+    setDirty(true);
+  };
+  const removeItem = (i) => {
+    if (!window.confirm("Are you sure you want to delete this experience?")) return;
+    setItems((list) => list.filter((_, idx) => idx !== i));
+    setDirty(true);
+  };
+  const addItem = () => {
+    setItems((list) => [
+      { title: "New Role", company: "", time: "", description: "" },
+      ...list,
+    ]);
+    setDirty(true);
+  };
+  const save = async () => {
+    setSaving(true);
+    try {
+      await saveExperiences(items);
+      setDirty(false);
+    } catch (err) {
+      alert(`Save failed: ${err.message}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="about-container">
       <aside className="about-sidebar">
@@ -67,16 +102,68 @@ const About = () => {
         {/*Timeline */}
         <section className="experience-section">
           <h2 className="section-title">Experience</h2>
-          
+
+          {isDev && (
+            <div className="dev-edit-bar">
+              <button className="dev-edit-btn" onClick={addItem}>
+                <Plus size={14} /> Add experience
+              </button>
+              <button
+                className="dev-btn-save"
+                onClick={save}
+                disabled={saving || !dirty}
+              >
+                {saving ? "Saving…" : dirty ? "Save" : "Saved"}
+              </button>
+            </div>
+          )}
+
           <div className="timeline">
-            {experiences.map((exp, index) => (
+            {items.map((exp, index) => (
               <div key={index} className="timeline-item">
                 <div className="timeline-dot"></div>
                 <div className="timeline-content">
-                  <span className="timeline-date">{exp.time}</span>
-                  <h3 className="timeline-role">{exp.title}</h3>
-                  <h4 className="timeline-company">{exp.company}</h4>
-                  <p className="description timeline-desc">{exp.description}</p>
+                  {isDev ? (
+                    <>
+                      <EditableText
+                        value={exp.time}
+                        onChange={(v) => setItem(index, { time: v })}
+                        placeholder="May 2026 - Jul 2026"
+                        className="timeline-date"
+                      />
+                      <EditableText
+                        value={exp.title}
+                        onChange={(v) => setItem(index, { title: v })}
+                        placeholder="Role / title"
+                        className="timeline-role"
+                      />
+                      <EditableText
+                        value={exp.company}
+                        onChange={(v) => setItem(index, { company: v })}
+                        placeholder="Company"
+                        className="timeline-company"
+                      />
+                      <EditableText
+                        value={exp.description}
+                        onChange={(v) => setItem(index, { description: v })}
+                        placeholder="Description"
+                        multiline
+                      />
+                      <button
+                        className="dev-btn-danger"
+                        onClick={() => removeItem(index)}
+                      >
+                        <Trash2 size={14} /> Remove
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <span className="timeline-date">{exp.time}</span>
+                      <h3 className="timeline-role">{exp.title}</h3>
+                      <h4 className="timeline-company">{exp.company}</h4>
+                      <p className="description timeline-desc">{exp.description}</p>
+                    </>
+                  )}
                 </div>
               </div>
             ))}
