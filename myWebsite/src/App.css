@@ -77,7 +77,6 @@ select,
   align-items: center;
   padding: 1.5rem 4rem;
   background-color: white;
-  border-bottom: 1px solid var(--light-grey);
 }
 
 .nav-links {
@@ -1488,4 +1487,98 @@ html.hide-scrollbar::-webkit-scrollbar {
   gap: 0.5rem;
   flex-wrap: wrap;
   margin-top: 0.5rem;
+}
+
+/* ========================================================================
+   Theme toggle + Night mode
+   ======================================================================== */
+.theme-toggle {
+  margin-left: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--light-charcoal);
+  background: transparent;
+  color: var(--charcoal);
+  cursor: pointer;
+  transition: color 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
+}
+.theme-toggle:hover {
+  color: var(--sky-dark);
+  border-color: var(--sky-med);
+}
+
+/* Smooth the flip between themes on the big surfaces. */
+body,
+.app,
+.navbar,
+.mobile-mini-card,
+.project-card-container,
+.about-container,
+.about-sidebar {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+[data-theme="dark"] {
+  --sky-light: #33507a;
+  --sky-med: #6f9fd8;
+  --sky-dark: #8fb6e8;
+  --charcoal: #e6ebf2;
+  --light-charcoal: #2c333f;
+  --med-charcoal: #9fb0c3;
+  --sky-very-light: #223048;
+  --very-light-charcoal: #1b212b;
+
+  --night-bg: #12161d;
+  --night-surface: #1b212b;
+  --night-surface-2: #232b37;
+}
+
+[data-theme="dark"] body,
+[data-theme="dark"] .app,
+[data-theme="dark"] .about-container {
+  background-color: var(--night-bg);
+  color: var(--charcoal);
+}
+
+[data-theme="dark"] .about-sidebar,
+[data-theme="dark"] .project-card-container,
+[data-theme="dark"] .project-card-header,
+[data-theme="dark"] .mini-card,
+[data-theme="dark"] .mobile-mini-card,
+[data-theme="dark"] .graph-search input,
+[data-theme="dark"] .suggestions,
+[data-theme="dark"] .profile-image,
+[data-theme="dark"] .edit-field,
+[data-theme="dark"] .button {
+  background-color: var(--night-surface);
+  color: var(--charcoal);
+}
+
+[data-theme="dark"] .navbar {
+  background-color: var(--night-bg);
+  color: var(--charcoal);
+}
+
+[data-theme="dark"] .mobile-mini-card,
+[data-theme="dark"] .project-card-header {
+  border-color: var(--light-charcoal);
+}
+
+[data-theme="dark"] .project-card-close-btn:hover,
+[data-theme="dark"] .suggestion-item:hover .suggestion-type,
+[data-theme="dark"] .mobile-mini-card:hover {
+  background-color: var(--night-surface-2);
+}
+
+[data-theme="dark"] .timeline-dot,
+[data-theme="dark"] .project-card-carousel-dot.active {
+  background-color: var(--sky-dark);
+}
+
+[data-theme="dark"] .graph-search input::placeholder {
+  color: var(--med-charcoal);
 }

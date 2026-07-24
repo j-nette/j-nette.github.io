@@ -1,4 +1,6 @@
 import './App.css';
+import { useState, useEffect } from 'react';
+import { Moon, Sun } from 'lucide-react';
 import cloudImage from './assets/cloud.png';
 import Typing from './assets/components';
 
@@ -6,6 +8,10 @@ import { HashRouter, Routes, Route, Link } from 'react-router-dom';
 import About from './pages/About';
 import Portfolio from './pages/Portfolio';
 import Daydreams from './pages/Daydreams';
+
+// Toggle this to enable/disable the light/dark mode feature.
+// When false, the site stays in light mode and the toggle button is hidden.
+const THEME_TOGGLE_ENABLED = false;
 
 
 function NotFound() {
@@ -21,6 +27,21 @@ function NotFound() {
 }
 
 function App() {
+  const [theme, setTheme] = useState(
+    () => (THEME_TOGGLE_ENABLED && localStorage.getItem("theme")) || "light"
+  );
+
+  useEffect(() => {
+    const active = THEME_TOGGLE_ENABLED ? theme : "light";
+    document.documentElement.setAttribute("data-theme", active);
+    if (THEME_TOGGLE_ENABLED) {
+      localStorage.setItem("theme", active);
+    }
+  }, [theme]);
+
+  const toggleTheme = () =>
+    setTheme((t) => (t === "dark" ? "light" : "dark"));
+
   return (
     <HashRouter>
       <nav className="navbar">
@@ -31,6 +52,16 @@ function App() {
           <li className='nav-link'><Link to="/about">About</Link></li>
 
         </ul>
+        {THEME_TOGGLE_ENABLED && (
+          <button
+            className="theme-toggle"
+            onClick={toggleTheme}
+            aria-label={theme === "dark" ? "Switch to day mode" : "Switch to night mode"}
+            title={theme === "dark" ? "Day mode" : "Night mode"}
+          >
+            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+        )}
       </nav>
 
       <Routes>
