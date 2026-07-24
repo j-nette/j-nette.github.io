@@ -898,6 +898,11 @@ html::-webkit-scrollbar {
   background-color: white;
   border-right: 1px solid var(--light-charcoal);
   overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.about-sidebar::-webkit-scrollbar {
+  display: none;
 }
 
 .sidebar-content {
