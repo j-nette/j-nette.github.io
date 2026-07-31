@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import { fileURLToPath, URL } from 'node:url'
 import react from '@vitejs/plugin-react'
+import { viteSingleFile } from 'vite-plugin-singlefile'
 import authoringPlugin from './dev/authoring-plugin.js'
 
 // Resolve a path relative to this config file.
@@ -12,7 +13,7 @@ export default defineConfig(({ command }) => {
 
   return {
     // The authoring backend is a dev-server-only plugin; never register it for builds.
-    plugins: [react(), ...(isBuild ? [] : [authoringPlugin()])],
+    plugins: [react(), viteSingleFile(), ...(isBuild ? [] : [authoringPlugin()])],
     resolve: {
       // Swap the authoring modules for inert stubs at build time so no editing
       // UI, upload logic, or write endpoints ship in the deployed bundle.

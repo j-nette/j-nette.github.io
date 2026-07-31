@@ -17,23 +17,16 @@ const daydreams = [
     "id": "hello-clouds",
     "title": "Hello From the Clouds",
     "date": "Jul 2026",
-    "tags": [
-      "Meta",
-      "Beginnings"
-    ],
-    "excerpt": "A little corner of the internet to keep my thoughts, half-baked ideas, and the occasional beep boop. Here's why I finally made one.",
+    "tags": [],
+    "excerpt": "First post & live website!",
     "body": [
       {
         "type": "text",
-        "value": "Placeholder text. This is the very first daydream — a soft landing spot for the ideas that don't quite fit into a project card or a resume bullet."
+        "value": "Hello, and welcome to my corner of the internet!\n\nI just completed my PEY term, which is a year of internships. On the side, I've been working on some personal projects - one of which being my long overdue personal website! I'm excited to finally launch this site (though it definitely is anything but perfect). \n\n"
       },
       {
-        "type": "text",
-        "value": "Placeholder text. Expect notes on robots, circuits, sketches, and whatever I happen to be curious about that week."
-      },
-      {
-        "type": "text",
-        "value": "Placeholder text. Thanks for floating by. Make yourself at home."
+        "type": "image",
+        "filename": "marmot.jpg"
       }
     ]
   }

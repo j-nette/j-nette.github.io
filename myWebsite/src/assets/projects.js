@@ -56,10 +56,33 @@ const projects = [
     },
     "images": [
       "trainramp.png",
-      "traingear.png",
-      "traincover.png",
       "trainsim.png",
-      "traincargo.png"
+      "traincargo.png",
+      "traincover.png",
+      "traingear.png"
+    ]
+  },
+  {
+    "id": "project-1785114203398",
+    "title": "ClipV.I.S",
+    "subtitle": "Clippy's here to help you with your hardware meetings (Microsoft Intern Hackathon winner)",
+    "description1": "An interactive Pepper's Ghost hologram for your meeting table. Clippy saw your struggles with clear and engaging meetings about hardware so Clippy materialized into 3D space to help you view and organize your presentation media! Gesture, voice, and hotkey controlled hologram visualization that renders objects at scale. Users can rotate, enlarge, translate, and view separate parts of an assembly via these multi-modal methods. AI-powered Clippy assistant can also be trained on specific presentation materials and Microsoft Fabric data to help answer presentation questions.",
+    "description2": "ClipV.I.S routes input from multimodal sources including MediaPipe hand gesture tracking, LLM voice control, and direct keyboard triggers into a single presenter window. The presenter mutates a central, cloneable state object, which is then broadcasted to a display-only follower window running four cross-angled viewports for the Pepper's Ghost projection. \n\nThe software stack consists of a Node.js backend and a Vite + React/TypeScript frontend. The Three.js rendering pipeline features auto-normalizing glTF loaders, custom shader material illumination, interactive exploded-view assemblies, and an integrated Clippy mascot with emotional states. Also features different viewing modes like normal, x-ray, and wireframe views. ",
+    "tags": [
+      "Web Dev",
+      "Computer Vision"
+    ],
+    "technologies": [
+      "Raycasting",
+      "React",
+      "OpenCV",
+      "Natural Language Processing"
+    ],
+    "links": {
+      "github": "https://github.com/j-nette/ClipV.I.S."
+    },
+    "images": [
+      "duck-hologram.png"
     ]
   },
   {
